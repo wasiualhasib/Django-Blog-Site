@@ -1,0 +1,63 @@
+{% extends "blog/base.html" %}
+{% block content %}
+
+    <h1>Draft Page</h1>
+    <!-- <p>{{request.build_absolute_uri}}</p>
+    <p>{{ request.resolver_match.url_name }}</p> -->
+    {% if posts.count > 0 %}
+        <h5>Total Draft Post:{{posts.count}}</h5>
+    {% else %}
+        <p>No post found for publish</p>
+    {% endif %}
+        
+    {% for post in posts %}
+    
+        {% if post.post_published == False %}
+
+            <article class="media content-section">
+                <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}" alt="">
+            <div class="media-body">
+                <div class="article-metadata">
+                <a class="mr-2" href="{% url 'user-posts' post.author.username %}">{{ post.author }}</a>
+                <small class="text-muted">{{ post.date_posted | date:'d-M-Y, D' }}</small>
+                </div>
+                <h2><a class="article-title" href="{{ post.get_absolute_url }}">{{ post.title }}</a></h2>
+                <p class="article-content text-justify">
+                    {{ post.post_content|safe}}
+            {#                {{ post.content|truncatewords:"35"|safe}} #}
+                </p>
+                <a href="{{ post.get_absolute_url }}" class="btn btn-info btn-sm mb-2">Read More..</a>
+
+               
+
+                {% if post.author.pk == user.pk and user.is_authenticated  and post.post_published == False %}
+                        
+                        <a href="{%  url 'publish-post' pk=post.pk  url_name=request.resolver_match.url_name %}" class="btn btn-danger btn-sm mb-2">Publish</a>
+                {% endif %}
+
+            </div>
+            </article>
+ 
+        {% endif %}
+    {% endfor %}
+
+    {% if is_paginated %}
+        {% if page_obj.has_previous %}
+            <a href="?page=1" class="btn btn-outline-info mb-4" alt="First Page">F&laquo;</a>
+            <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline-info mb-4" alt="Previous Page">P&#8249;</a>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                 <a href="?page={{ num }}" class="btn btn-info mb-4">{{ num }}</a>
+            {% elif num > page_obj.number|add:'-2' and num < page_obj.number|add:'2'%}
+                <a href="?page={{ num }}" class="btn btn-outline-info mb-4">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline-info mb-4" alt="Next Page">N&#8250;</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-outline-info mb-4" alt="Last Page">L&raquo;</a>
+        {% endif %}
+    {% endif %}
+
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "blog/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <h1>Details Page</h1>
+
+        <article class="media content-section">
+            <img class="rounded-circle article-img" src="{{ object.author.profile.image.url }}" alt="">
+          <div class="media-body">
+            <div class="article-metadata">
+              <a class="mr-2" href="{% url 'user-posts' object.author.username %}">{{ object.author }}</a>
+              <small class="text-muted">{{ object.date_posted | date:'d-M-Y' }}</small>
+                <div class="m-3">
+                    {% if object.author.id == user.id  %}
+                        <a href="{{ post.update_post }}" class="btn btn-success btn-sm mt-1 mr-1">Edit</a>
+                        <a href="{{ post.delete_post }}" class="btn btn-danger btn-sm mt-1 mr-1 ">Delete</a>
+                    {% endif %}
+
+                </div>
+            </div>
+            <h2 class="article-title">{{ object.title }}</h2>
+            <p class="article-content">{{ object.content|safe }}</p>
+          </div>
+
+        </article>
+        <div class="container">
+          
+
+            <form action="{% url 'add-comment' pk=post.pk %}" method="POST">
+              {% csrf_token %}
+              {{form.media }}
+              {{form|crispy}}
+          {% if user.is_authenticated %}
+              <input type="submit" class="btn btn-primary float-right" value="Add Comment">
+          {% else %}
+              <a class="btn btn-danger float-right" href="{% url 'login' %}">Login Required</a>
+          {% endif %}
+            </form>
+          <br>  <br>
+          <!-- <p>{{user.id}}</p>
+          <p>{{object.author.id}}</p> -->
+          {% for comment in post.comments.all %}
+          <br>
+         
+              {% if user.is_authenticated  %}
+        
+                      {{ comment.created_date }}
+                      <!-- <p>{{user.pk}}</p>
+                      <p>{{comment.post.author.pk}}</p> -->
+                      {% if not comment.approved_comment and user.pk == comment.post.author.pk and user.is_staff %}
+                          <a class="btn btn-default" href="{% url 'remove-comment' pk=comment.id %}"><span class="glyphicon glyphicon-remove"></span>Remove</a>
+                          <a class="btn btn-default" href="{% url 'approve-comment' pk=comment.id %}"><span class="glyphicon glyphicon-ok"></span>Approve</a>
+                      {% else %}
+                          <a class="btn btn-default" href="{% url 'update-comment' pk=comment.id %}"><span class="glyphicon glyphicon-remove"></span>Update</a>
+                          <a class="btn btn-default" href="{% url 'remove-comment' pk=comment.id %}"><span class="glyphicon glyphicon-remove"></span>Remove</a>
+                      {% endif %}
+        
+                  <p>{{ comment.comments|safe|linebreaks }}</p>
+                  <p>Posted by: <strong>{{ comment.author }}</strong></p>
+              {% else %}
+                <p>{{ comment.comments|safe|linebreaks }}</p><p>Posted by: <strong>{{comment.author}}</strong></p>
+              {% endif %}
+          {% empty %}
+              <p>No comments posted.</p>
+          {% endfor %}
+        </div>
+{% endblock %}

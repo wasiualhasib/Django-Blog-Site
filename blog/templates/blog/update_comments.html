@@ -1,0 +1,10 @@
+{% extends "blog/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <h1>Update Comments</h1>
+    <form action="">
+        {{form|crispy}}
+        <input type="submit" class="btn btn-info" value="Submit">
+    </form>
+{% endblock %}
